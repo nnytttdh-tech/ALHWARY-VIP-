@@ -1,14 +1,5 @@
 {
   "site_status": "locked",
-  "net_codes": [
-    {
-      "code": "Kjg1OCo5OTA2MTQyMDI3MDQ2Iw==",
-      "units": "50"
-    },
-    {
-      "code": "Kjg1OCo5OTA2MTQyMDI3MDQ2Iw==",
-      "units": "50"
-    }
-  ],
+  "net_codes": [],
   "active_users": {}
 }
