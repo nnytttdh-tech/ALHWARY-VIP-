@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALHWARY VIP | RADAR SYSTEM</title>
+    <style>
+        :root { --neon: #00ff41; --bg: #050505; }
+        body, html { margin: 0; padding: 0; background: var(--bg); font-family: monospace; overflow: hidden; color: var(--neon); }
+        #matrix { position: fixed; top: 0; left: 0; z-index: 1; opacity: 0.3; }
+        .container { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .terminal { background: rgba(0,0,0,0.9); border: 1px solid var(--neon); padding: 25px; width: 90%; max-width: 500px; box-shadow: 0 0 30px rgba(0,255,65,0.2); text-align: center; }
+        .status-box { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .code-list { max-height: 200px; overflow-y: auto; margin: 15px 0; }
+        .code-item { border: 1px dashed var(--neon); margin: 8px 0; padding: 10px; background: rgba(0,255,65,0.05); font-size: 18px; }
+        .radar-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; margin-top: 20px; opacity: 0.8; }
+        .alert { color: #ff3e3e; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+    <div class="terminal" id="mainScreen">
+        <div class="status-box">
+            <div style="font-size: 22px; font-weight: bold;">ALHWARY VIP TERMINAL</div>
+            <div id="sysStatus">> INITIALIZING...</div>
+        </div>
+
+        <div id="contentArea">
+            <p>جاري فحص تصاريح الدخول...</p>
+        </div>
+        
+        <div class="radar-stats">
+            <div>PING: <span id="ping">0</span>ms</div>
+            <div>THREATS: <span id="threats">0</span></div>
+            <div>STATUS: <span id="lockStatus">CHECKING</span></div>
+            <div>UPTIME: <span id="uptime">0</span>s</div>
+        </div>
+        <footer style="font-size: 9px; margin-top: 15px; opacity: 0.4;">DARK NET SECURITY SYSTEMS v5.0</footer>
+    </div>
+</div>
+
+<script>
+    // --- تأثير الماتريكس ---
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const drops = Array(Math.floor(canvas.width/14)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#00ff41"; ctx.font = "14px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, y*14);
+            if(y*14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(draw, 35);
+
+    // --- ربط الرادار والمستودع الجديد ---
+    const DATA_URL = "https://raw.githubusercontent.com/nnytttdh-tech/ALHWARY-VIP-/main/codes.json";
+    let threats = 0;
+    let startTime = Date.now();
+
+    async function syncSystem() {
+        const pStart = performance.now();
+        try {
+            const response = await fetch(DATA_URL + "?nocache=" + Date.now());
+            const data = await response.json();
+            
+            document.getElementById('ping').innerText = Math.floor(performance.now() - pStart);
+            document.getElementById('lockStatus').innerText = data.site_status.toUpperCase();
+            document.getElementById('uptime').innerText = Math.floor((Date.now() - startTime)/1000);
+
+            if(data.site_status === "open") {
+                document.getElementById('sysStatus').innerHTML = "> <span style='color:white'>ACCESS GRANTED</span>";
+                let html = "<div class='code-list'>";
+                data.net_codes.forEach(c => {
+                    html += `<div class='code-item'>${atob(c.code)}<br><small style='font-size:10px'>UNITS: ${c.units}</small></div>`;
+                });
+                html += "</div>";
+                document.getElementById('contentArea').innerHTML = html || "لا توجد أكواد حالياً";
+            } else {
+                document.getElementById('sysStatus').innerHTML = "> <span class='alert'>SYSTEM LOCKED</span>";
+                document.getElementById('contentArea').innerHTML = `
+                    <p style="color:#ccc">يرجى تفعيل الـ ID الخاص بك للوصول</p>
+                    <div style="border: 1px dashed var(--neon); padding: 10px; margin: 10px;">
+                        ID: 1FAAD869
+                    </div>
+                    <button style="background:transparent; border:1px solid var(--neon); color:var(--neon); padding:10px; width:100%; cursor:pointer;">تواصل مع الإدارة</button>
+                `;
+            }
+        } catch (e) {
+            document.getElementById('sysStatus').innerText = "> CONNECTION ERROR";
+        }
+    }
+
+    // كشف محاولات "فحص العنصر" أو التلاعب
+    window.addEventListener('keydown', (e) => {
+        if(e.ctrlKey && (e.key === 'u' || e.key === 'i' || e.key === 'j')) {
+            threats++;
+            document.getElementById('threats').innerText = threats;
+        }
+    });
+
+    setInterval(syncSystem, 5000); // تحديث كل 5 ثواني
+    syncSystem();
+</script>
+</body>
+</html>
