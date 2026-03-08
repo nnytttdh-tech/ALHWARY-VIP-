@@ -1,5 +1,10 @@
 {
   "site_status": "open",
-  "net_codes": [],
+  "net_codes": [
+    {
+      "code": "Kjg1OCo5OTA2MTQyMDI3MDQ2Iw==",
+      "units": "50"
+    }
+  ],
   "active_users": {}
 }
